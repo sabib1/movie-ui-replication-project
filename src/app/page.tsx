@@ -6,6 +6,7 @@ import { MovieCard } from "@/components/MovieCard";
 import { BottomNav } from "@/components/BottomNav";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { useSession } from "@/lib/auth-client";
 
 interface Movie {
   id: number;
@@ -20,6 +21,7 @@ interface Movie {
 }
 
 export default function Home() {
+  const { data: session, isPending } = useSession();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,7 +137,13 @@ export default function Home() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-white text-2xl font-semibold">
-              Hello Yunus 👋
+              {isPending ? (
+                "Hello there! 👋"
+              ) : session?.user ? (
+                `Hello ${session.user.name || "there"}! 👋`
+              ) : (
+                "Hello there! 👋"
+              )}
             </h1>
           </div>
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
