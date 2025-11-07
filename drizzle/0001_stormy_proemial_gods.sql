@@ -1,0 +1,1 @@
+ALTER TABLE `movies` ADD `download_link` text DEFAULT '' NOT NULL;

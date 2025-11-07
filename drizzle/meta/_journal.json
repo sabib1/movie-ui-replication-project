@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1762421413821,
+      "tag": "0000_damp_unus",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1762433043980,
+      "tag": "0001_stormy_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1762513592465,
+      "tag": "0002_old_captain_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1762519094108,
+      "tag": "0003_tense_frank_castle",
+      "breakpoints": true
+    }
+  ]
+}
