@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 interface Movie {
   id: number;
@@ -22,6 +23,7 @@ interface Movie {
 
 export default function Home() {
   const { data: session, isPending } = useSession();
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,15 +148,29 @@ export default function Home() {
               )}
             </h1>
           </div>
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden">
-            <Image
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
-              alt="Profile"
-              width={48}
-              height={48}
-              className="object-cover"
-            />
-          </div>
+          {isPending ? (
+            <div className="w-12 h-12 rounded-full bg-gray-800 animate-pulse" />
+          ) : session?.user ? (
+            <button
+              onClick={() => router.push("/profile")}
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden hover:scale-105 transition-transform cursor-pointer"
+            >
+              <Image
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
+                alt="Profile"
+                width={48}
+                height={48}
+                className="object-cover"
+              />
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/login")}
+              className="px-6 py-2.5 rounded-full bg-[#151717] hover:bg-[#1f2121] text-white font-semibold text-sm shadow-lg shadow-gray-900/30 hover:shadow-gray-900/50 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              Log in
+            </button>
+          )}
         </div>
 
         {/* Greeting */}
