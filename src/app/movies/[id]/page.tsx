@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Star, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
+import { useSession } from "@/lib/auth-client";
 
 interface Movie {
   id: number;
@@ -24,6 +25,7 @@ export default function MovieDetailPage() {
   const router = useRouter();
   const params = useParams();
   const movieId = params.id as string;
+  const { data: session, isPending } = useSession();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [suggestions, setSuggestions] = useState<Movie[]>([]);
@@ -74,6 +76,22 @@ export default function MovieDetailPage() {
       link.click();
       document.body.removeChild(link);
     }
+  };
+
+  const handleBookmarkClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Check if user is authenticated
+    if (!session?.user) {
+      // Prevent the checkbox from being checked
+      e.preventDefault();
+      e.target.checked = false;
+      
+      // Redirect to login with current page as redirect URL
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    
+    // If authenticated, allow the bookmark action
+    // TODO: Implement actual bookmark functionality with backend
   };
 
   const fullStars = Math.floor(movie?.rating || 0);
@@ -361,7 +379,7 @@ export default function MovieDetailPage() {
             </button>
 
             <label className="ui-bookmark">
-              <input type="checkbox" />
+              <input type="checkbox" onChange={handleBookmarkClick} />
               <div className="bookmark">
                 <svg viewBox="0 0 32 32">
                   <g>
