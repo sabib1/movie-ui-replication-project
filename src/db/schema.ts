@@ -31,6 +31,7 @@ export const user = sqliteTable("user", {
     .notNull(),
   image: text("image"),
   avatarUrl: text("avatar_url"),
+  bookmarks: text("bookmarks").default("[]"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),

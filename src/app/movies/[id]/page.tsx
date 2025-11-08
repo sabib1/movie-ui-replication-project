@@ -7,6 +7,7 @@ import { Star, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovieCard } from "@/components/MovieCard";
 import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 interface Movie {
   id: number;
@@ -31,7 +32,11 @@ export default function MovieDetailPage() {
   const [suggestions, setSuggestions] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [checkingBookmark, setCheckingBookmark] = useState(false);
 
+  // Fetch movie details and suggestions
   useEffect(() => {
     async function fetchMovieDetails() {
       try {
@@ -66,6 +71,32 @@ export default function MovieDetailPage() {
     }
   }, [movieId]);
 
+  // Check bookmark status when user is signed in
+  useEffect(() => {
+    async function checkBookmarkStatus() {
+      if (!session?.user?.id || !movieId) return;
+
+      try {
+        setCheckingBookmark(true);
+        const response = await fetch(
+          `/api/bookmarks?userId=${encodeURIComponent(session.user.id)}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const bookmarks = data.bookmarks || [];
+          setIsBookmarked(bookmarks.includes(parseInt(movieId)));
+        }
+      } catch (error) {
+        console.error("Error checking bookmark status:", error);
+      } finally {
+        setCheckingBookmark(false);
+      }
+    }
+
+    checkBookmarkStatus();
+  }, [session?.user?.id, movieId]);
+
   const handleDownload = () => {
     if (movie?.downloadLink) {
       // Create a temporary anchor element to trigger download in current page
@@ -78,7 +109,9 @@ export default function MovieDetailPage() {
     }
   };
 
-  const handleBookmarkClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBookmarkClick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    
     // Check if user is authenticated
     if (!session?.user) {
       // Prevent the checkbox from being checked
@@ -89,9 +122,50 @@ export default function MovieDetailPage() {
       router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
-    
-    // If authenticated, allow the bookmark action
-    // TODO: Implement actual bookmark functionality with backend
+
+    // Prevent multiple rapid clicks
+    if (bookmarkLoading) {
+      e.target.checked = !isChecked;
+      return;
+    }
+
+    try {
+      setBookmarkLoading(true);
+      const token = localStorage.getItem("bearer_token");
+      
+      if (!token) {
+        toast.error("Authentication required");
+        e.target.checked = !isChecked;
+        router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+
+      const endpoint = isChecked ? "/api/bookmarks/add" : "/api/bookmarks/remove";
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ movieId: parseInt(movieId) }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update bookmark");
+      }
+
+      const data = await response.json();
+      setIsBookmarked(isChecked);
+      
+      toast.success(isChecked ? "Added to bookmarks" : "Removed from bookmarks");
+    } catch (error) {
+      console.error("Error updating bookmark:", error);
+      toast.error("Failed to update bookmark. Please try again.");
+      // Revert checkbox state
+      e.target.checked = !isChecked;
+    } finally {
+      setBookmarkLoading(false);
+    }
   };
 
   const fullStars = Math.floor(movie?.rating || 0);
@@ -378,16 +452,23 @@ export default function MovieDetailPage() {
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
 
-            <label className="ui-bookmark">
-              <input type="checkbox" onChange={handleBookmarkClick} />
-              <div className="bookmark">
-                <svg viewBox="0 0 32 32">
-                  <g>
-                    <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
-                  </g>
-                </svg>
-              </div>
-            </label>
+            {session?.user && (
+              <label className={`ui-bookmark ${bookmarkLoading ? 'opacity-50 cursor-wait' : ''}`}>
+                <input 
+                  type="checkbox" 
+                  checked={isBookmarked}
+                  onChange={handleBookmarkClick}
+                  disabled={bookmarkLoading || checkingBookmark}
+                />
+                <div className="bookmark">
+                  <svg viewBox="0 0 32 32">
+                    <g>
+                      <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+                    </g>
+                  </svg>
+                </div>
+              </label>
+            )}
           </div>
 
           {/* Movie Info - Horizontal Layout */}

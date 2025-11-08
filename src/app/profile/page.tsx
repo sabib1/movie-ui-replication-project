@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Clock, Star, Settings, ChevronRight } from "lucide-react";
+import { Heart, Clock, Star, Settings, ChevronRight, Bookmark } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,8 @@ export default function ProfilePage() {
   const { data: session, isPending, refetch } = useSession();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
+  const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -20,6 +22,32 @@ export default function ProfilePage() {
       router.push("/login");
     }
   }, [session, isPending, router]);
+
+  // Fetch bookmark count
+  useEffect(() => {
+    async function fetchBookmarks() {
+      if (!session?.user?.id) return;
+
+      try {
+        setLoadingBookmarks(true);
+        const response = await fetch(
+          `/api/bookmarks?userId=${encodeURIComponent(session.user.id)}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const bookmarks = data.bookmarks || [];
+          setBookmarkCount(bookmarks.length);
+        }
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+      } finally {
+        setLoadingBookmarks(false);
+      }
+    }
+
+    fetchBookmarks();
+  }, [session?.user?.id]);
 
   // Handle sign out
   const handleSignOut = async () => {
@@ -92,9 +120,15 @@ export default function ProfilePage() {
           </Card>
           <Card className="bg-[#141414] border-[#2d2d2d] h-[114px]">
             <CardContent className="flex flex-col items-center justify-center p-0 h-full">
-              <Heart className="w-6 h-6 text-yellow-500" />
-              <p className="text-white text-xl font-semibold">42</p>
-              <p className="text-gray-400 text-xs">Favorites</p>
+              <Bookmark className="w-6 h-6 text-yellow-500" />
+              <p className="text-white text-xl font-semibold">
+                {loadingBookmarks ? (
+                  <span className="inline-block w-8 h-6 bg-gray-700 animate-pulse rounded" />
+                ) : (
+                  bookmarkCount
+                )}
+              </p>
+              <p className="text-gray-400 text-xs">Bookmarked</p>
             </CardContent>
           </Card>
           <Card className="bg-[#141414] border-[#2d2d2d] h-[114px]">
@@ -108,11 +142,14 @@ export default function ProfilePage() {
 
         {/* Menu Items */}
         <div className="flex flex-col gap-4 mb-6">
-          <Card className="bg-[#141414] border-[#2d2d2d] hover:bg-[#1c1c1c] transition-colors cursor-pointer h-[58px]">
+          <Card 
+            onClick={() => router.push("/bookmarks")}
+            className="bg-[#141414] border-[#2d2d2d] hover:bg-[#1c1c1c] transition-colors cursor-pointer h-[58px]"
+          >
             <CardContent className="flex items-center justify-between p-0 px-4 h-full">
               <div className="flex items-center gap-3">
-                <Heart className="w-5 h-5 text-gray-400" />
-                <span className="text-white">My Watchlist</span>
+                <Bookmark className="w-5 h-5 text-gray-400" />
+                <span className="text-white">My Bookmark</span>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </CardContent>
