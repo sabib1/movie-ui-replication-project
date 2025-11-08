@@ -1,3 +1,9 @@
+/* Updated: 2025-11-08T14:22:15.954Z */
+/* Updated: 2025-11-07T18:42:56.507Z */
+/* Updated: 2025-11-07T17:08:16.998Z */
+/* Updated: 2025-11-07T16:44:43.537Z */
+/* Updated: 2025-11-07T16:39:49.083Z */
+/* Updated: 2025-11-07T15:51:58.154Z */
 /* Updated: 2025-11-07T15:00:12.476Z */
 /* Updated: 2025-11-07T12:37:07.828Z */
 /* Updated: 2025-11-07T12:03:33.564Z */
@@ -129,6 +135,19 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Hide scrollbar but keep scroll enabled */
+  html,
+  body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    height: 100%;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 }
 

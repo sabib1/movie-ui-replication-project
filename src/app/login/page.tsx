@@ -1,15 +1,16 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { authClient, useSession } from "@/lib/auth-client";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginForm() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [avatars, setAvatars] = useState<{ id: number; url: string }[]>([]);
@@ -23,6 +24,16 @@ export default function LoginPage() {
   });
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/";
+  const { data: session, isPending } = useSession();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.push("/");
+    }
+  }, [session, isPending, router]);
 
   // Fetch avatars from the API
   useEffect(() => {
@@ -101,9 +112,9 @@ export default function LoginPage() {
 
         toast.success("Account created successfully! Redirecting...");
         
-        // Redirect to home page after successful signup
+        // Redirect to the original page or home after successful signup
         setTimeout(() => {
-          router.push("/");
+          router.push(redirectUrl);
         }, 1000);
       } else {
         // Sign in - First check if email exists
@@ -137,9 +148,9 @@ export default function LoginPage() {
 
         toast.success("Signed in successfully! Redirecting...");
         
-        // Redirect to home page after successful login
+        // Redirect to the original page or home after successful login
         setTimeout(() => {
-          router.push("/");
+          router.push(redirectUrl);
         }, 1000);
       }
     } catch (error) {
@@ -473,5 +484,17 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-black flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
