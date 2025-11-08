@@ -72,8 +72,44 @@ export default function ProfilePage() {
   // Show loading state while checking authentication
   if (isPending) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-black pb-24">
+        <div className="max-w-md mx-auto px-6 py-8">
+          {/* Profile Header Skeleton */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-24 h-24 rounded-full bg-gray-800 animate-pulse mb-4" />
+            <div className="h-7 w-32 bg-gray-800 rounded animate-pulse mb-2" />
+            <div className="h-4 w-40 bg-gray-800 rounded animate-pulse" />
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-[#141414] border border-[#2d2d2d] rounded-lg h-[114px] flex flex-col items-center justify-center gap-2 p-4">
+                <div className="w-6 h-6 bg-gray-800 rounded animate-pulse" />
+                <div className="h-7 w-12 bg-gray-800 rounded animate-pulse" />
+                <div className="h-3 w-16 bg-gray-800 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+
+          {/* Menu Items Skeleton */}
+          <div className="flex flex-col gap-4 mb-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-[#141414] border border-[#2d2d2d] rounded-lg h-[58px] flex items-center justify-between px-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-gray-800 rounded animate-pulse" />
+                  <div className="h-4 w-24 bg-gray-800 rounded animate-pulse" />
+                </div>
+                <div className="w-5 h-5 bg-gray-800 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+
+          {/* Sign Out Button Skeleton */}
+          <div className="w-full h-14 rounded-full bg-gray-800 animate-pulse" />
+        </div>
+
+        <BottomNav />
       </div>
     );
   }
