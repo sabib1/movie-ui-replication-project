@@ -155,13 +155,19 @@ export default function Home() {
               onClick={() => router.push("/profile")}
               className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 overflow-hidden hover:scale-105 transition-transform cursor-pointer"
             >
-              <Image
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop"
-                alt="Profile"
-                width={48}
-                height={48}
-                className="object-cover"
-              />
+              {session.user.image ? (
+                <Image
+                  src={session.user.image}
+                  alt={session.user.name || "Profile"}
+                  width={48}
+                  height={48}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white text-xl font-bold">
+                  {session.user.name?.charAt(0).toUpperCase() || "U"}
+                </div>
+              )}
             </button>
           ) : (
             <button
